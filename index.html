@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doritos Ninja - נראה אותך!</title>
+    <!-- Corrected Font Import -->
+    <link rel="preconnect" href="https://cdn.fonts.net">
+    <link href="https://cdn.fonts.net/kit/b0067cb2-af6e-445f-93f1-5c08b330edca/b0067cb2-af6e-445f-93f1-5c08b330edca.css" rel="stylesheet" />
+    <style>
+         /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'NachsholBlack', sans-serif; /* Corrected font name */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: white;
+        }
+
+        #game-container {
+            flex: 1;
+            position: relative;
+        }
+
+        /* Score & Timer */
+        #score, #timer {
+            position: absolute;
+            font-size: 2em;
+            color: #FF4B00;
+            font-weight: bold;
+            z-index: 100;
+            text-shadow: 0 0 10px rgba(255, 75, 0, 0.8);
+        }
+
+        #score {
+            top: 20px;
+            right: 20px;
+        }
+
+        #timer {
+            top: 20px;
+            left: 20px;
+        }
+
+        /* Game Over Screen */
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1000;
+            display: none; /* Hidden by default */
+        }
+         #game-over h2 {
+            color: #FF4B00;
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-shadow:
+                0 0 10px rgba(255, 75, 0, 0.7),
+                0 0 20px rgba(255, 75, 0, 0.5);
+            animation: pulseText 2s infinite;
+        }
+
+        @keyframes pulseText {
+            0%, 100% { text-shadow: 0 0 10px rgba(255, 75, 0, 0.7), 0 0 20px rgba(255, 75, 0, 0.5); }
+            50% { text-shadow: 0 0 15px rgba(255, 75, 0, 0.9), 0 0 30px rgba(255, 75, 0, 0.7); }
+        }
+          #final-score {
+            color: #FFB800;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(255, 184, 0, 0.6);
+            animation: scoreReveal 0.5s ease-out;
+        }
+
+        @keyframes scoreReveal {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+         #challenge-text {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 30px;
+            max-width: 400px;
+            line-height: 1.4;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #restart-button {
+            padding: 15px 30px;
+            font-size: 20px;
+            background: linear-gradient(45deg, #FF4B00, #FFB800);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        #restart-button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Doritos Styles */
+        .doritos {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: auto;
+            cursor: none;
+            will-change: transform;
+        }
+
+        .doritos-half {
+            position: absolute;
+            pointer-events: none;
+            transform-origin: center;
+            animation: splitFly 0.5s ease-out forwards;
+            width: 60px;
+            height: 60px;
+        }
+      /* Lightning Styles */
+        .lightning {
+            position: absolute;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        .lightning::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+             background: linear-gradient(90deg, /* Back to original gradient */
+                transparent 0%,
+                #FF4B00 20%,
+                #FFB800 50%,
+                #FF4B00 80%,
+                transparent 100%
+            );
+            box-shadow:
+                0 0 25px #ff4b00,
+                0 0 50px #ff4b0080,
+                0 0 8px 4px #00000080, /* Darker outline */
+                inset 0 0 4px 2px #00000040;
+            animation: lightningStrike 0.3s ease-out forwards;
+
+        }
+
+        @keyframes lightningStrike {
+           0% {
+                height: 4px;
+                 clip-path: polygon(
+                   0% 50%,
+                    3% 35%,
+                    6% 65%,
+                    10% 50%,
+                    15% 30%,
+                   25% 62%,
+                    40% 50%,
+                   44% 55%,
+                   48% 50%,
+                   51% 20%,
+                   56% 90%,
+                   62% 30%,
+                    70% 55%,
+                    78% 50%,
+                    84% 40%,
+                   90% 60%,
+                   96% 50%,
+                   100% 50%
+                );
+                transform-origin: 0% 50%;
+            }
+            5%, 95%{
+              height: 30px;
+                   clip-path: polygon(
+                  0% 44%,
+        6% 53%,
+        9% 36%,
+        13% 49%,
+        16% 38%,
+        23% 49%,
+        28% 42%,
+        34% 52%,
+        36% 62%,
+        37% 47%,
+        47% 32%,
+        53% 59%,
+        55% 72%,
+        61% 70%,
+        68% 37%,
+        75% 65%,
+        78% 52%,
+        83% 47%,
+        87% 62%,
+        88% 35%,
+        93% 47%,
+        97% 64%,
+        100% 75%
+                );
+
+             transform-origin: 50% 50%;
+
+            }
+
+
+            100% {
+               height: 4px;
+         clip-path: polygon(
+                  0% 50%,
+                    3% 47%,
+                    6% 55%,
+                    10% 49%,
+                    15% 42%,
+                   25% 57%,
+                    40% 50%,
+                   44% 52%,
+                   48% 47%,
+                   51% 42%,
+                   56% 75%,
+                   62% 35%,
+                    70% 52%,
+                    78% 48%,
+                    84% 45%,
+                   90% 58%,
+                   96% 46%,
+                   100% 50%
+                );
+                transform-origin: 100% 50%;
+
+            }
+        }
+          /* Particles */
+        .particle {
+            position: absolute;
+            /* Removed fixed width/height */
+            background: linear-gradient(45deg, #FF4B00, #FFB800);
+            pointer-events: none;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #FF4B00;
+        }
+
+
+        /* Animations */
+         @keyframes splitFly {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--flyX), var(--flyY)) rotate(var(--spinDeg)); opacity: 0; }
+        }
+
+          @keyframes particleFall {
+            0% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(var(--midX), var(--midY)) rotate(var(--midRotation)) scale(var(--scale));
+                opacity: 0.7;
+            }
+            100% {
+                transform: translate(var(--finalX), var(--finalY)) rotate(var(--rotation)) scale(0.1);
+                opacity: 0;
+            }
+        }
+         @keyframes fadeOut {
+           to {
+               opacity: 0;
+           }
+        }
+
+           /* Start Screen */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+        }
+
+        #start-button {
+            padding: 15px 30px;
+            font-size: 24px;
+            background: linear-gradient(45deg, #FF4B00, #FFB800);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .title {
+            color: #FF4B00;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .tagline {
+            font-size: 24px;
+            color: #FFB800;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 80%;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Score and Timer -->
+        <div id="score">ניקוד: <span id="score-value">0</span></div>
+        <div id="timer">זמן: <span id="timer-value">30</span></div>
+
+        <!-- Game Over Screen -->
+          <div id="game-over">
+             <h2>נגמר הזמן, חביבי!</h2>
+            <div id="final-score"></div>
+            <div id="challenge-text"></div>
+            <button id="restart-button">יאללה, עוד סיבוב!</button>
+        </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen">
+         <div class="title">דוריטוס נינג'ה</div>
+         <div class="tagline">תראה מה זה! אתה מספיק גבר לחתוך את כל הדוריטוס האלה?!</div>
+        <button id="start-button">בוא נתחיל</button>
+    </div>
+
+    <script>
+           let score = 0;
+        let gameActive = false;
+        let timeLeft = 30;
+        let gameTimer;
+        const gameContainer = document.getElementById('game-container');
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-button');
+        const scoreElement = document.getElementById('score-value');
+
+        startButton.addEventListener('click', startGame);
+
+        function startGame() {
+            startScreen.style.display = 'none';
+            document.getElementById('game-over').style.display = 'none';
+            gameActive = true;
+            score = 0;
+            timeLeft = 30;
+            scoreElement.textContent = score;
+            document.getElementById('timer-value').textContent = timeLeft;
+
+            clearInterval(gameTimer);
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-value').textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            spawnDoritos();
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(gameTimer);
+
+            const gameOver = document.getElementById('game-over');
+            const finalScore = document.getElementById('final-score');
+            const challengeText = document.getElementById('challenge-text');
+
+            gameOver.style.display = 'block';
+            finalScore.textContent = `השגת ${score} נקודות, לא רע!`;
+
+             // Sharper, more Doritos-like copy
+            let message = '';
+            if (score < 100) {
+                message = 'מה נסגר? זה כל מה שיש לך לתת? קדימה, תתאמץ קצת, קרחנה!';
+            } else if (score < 200) {
+                message = 'בסדר, לא רע בכלל. אבל יש לך עוד הרבה מה להוכיח, צ׳יקו!';
+            } else if (score < 300) {
+                message = 'וואו! אתה תותח! אבל... נראה אותך שובר את השיא של עצמך, אמיגו!';
+            } else {
+                message = 'מטורף! אתה פשוט אגדה! אבל... בטוח שאי אפשר *יותר* מזה?';
+            }
+
+            challengeText.textContent = message;
+               // ניקוי כל המשולשים מהמסך
+           const doritos = document.getElementsByClassName('doritos');
+            while(doritos.length > 0){
+                doritos[0].parentNode.removeChild(doritos[0]);
+            }
+
+        }
+		document.getElementById('restart-button').addEventListener('click', startGame);
+
+        function spawnDoritos() {
+            if (!gameActive) return;
+
+            const doritos = document.createElement('img');
+            doritos.className = 'doritos';
+            doritos.src = `media/${Math.floor(Math.random() * 4) + 1}.png`;
+
+            const startX = Math.random() * (window.innerWidth - 60);
+            const startY = window.innerHeight;
+
+            doritos.style.left = `${startX}px`;
+            doritos.style.top = `${startY}px`;
+            gameContainer.appendChild(doritos);
+
+            const angle = -70 + Math.random() * 140;
+            const speed = 8 + Math.random() * 5;
+            let currentY = startY;
+            let currentX = startX;
+            let rotation = 0;
+
+            function animate() {
+                if (!gameActive) {
+					 gameContainer.removeChild(doritos);
+                    return;
+                }
+
+                currentY -= speed;
+                currentX += Math.tan(angle * Math.PI / 180) * speed;
+                rotation += 5;
+
+                doritos.style.transform = `translate(${currentX - startX}px, ${currentY - startY}px) rotate(${rotation}deg)`;
+
+                if (currentY < -60) {
+                    gameContainer.removeChild(doritos);
+                } else {
+                    requestAnimationFrame(animate);
+                }
+            }
+
+            animate();
+             // Spawn next doritos
+            setTimeout(spawnDoritos, 200 + Math.random() * 300);
+        }
+
+
+ // Slice handling
+        let isSlicing = false;
+        let lastX, lastY;
+
+        gameContainer.addEventListener('mousedown', startSlice);
+        gameContainer.addEventListener('mousemove', continueSlice);
+        gameContainer.addEventListener('mouseup', endSlice);
+        gameContainer.addEventListener('mouseleave', endSlice);
+
+        gameContainer.addEventListener('touchstart', handleTouchStart);
+        gameContainer.addEventListener('touchmove', handleTouchMove);
+        gameContainer.addEventListener('touchend', handleTouchEnd);
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            startSlice({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            continueSlice({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            endSlice();
+        }
+
+        function startSlice(e) {
+            isSlicing = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        }
+		 function continueSlice(e) {
+            if (!isSlicing) return;
+
+
+          const lightning = document.createElement('div'); // Create a div
+          lightning.className = 'lightning';  // New class name
+          const length = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+          const angle = Math.atan2(e.clientY - lastY, e.clientX - lastX) * 180 / Math.PI;
+
+            lightning.style.width = `${length}px`;
+          lightning.style.left = `${lastX}px`;
+          lightning.style.top = `${lastY}px`;
+          lightning.style.transform = `rotate(${angle}deg)`;
+
+            gameContainer.appendChild(lightning);  // Add it
+
+             // Get current slice height for particle count and scaling
+            const computedStyle = getComputedStyle(lightning); // Get the height *after* animation.
+            const currentHeight = parseFloat(computedStyle.height);
+
+
+            setTimeout(() => { // Remove after animation
+                if (lightning.parentNode === gameContainer) {
+                    gameContainer.removeChild(lightning);
+                }
+            }, 300);
+
+			// Collision detection
+            const doritos = document.getElementsByClassName('doritos');
+			const currentDoritos = Array.from(doritos);
+            for (let chip of currentDoritos) {
+                const rect = chip.getBoundingClientRect();
+                const chipCenterX = rect.left + rect.width / 2;
+                const chipCenterY = rect.top + rect.height / 2;
+
+                const distanceToLine = pointToLineDistance(
+                    chipCenterX, chipCenterY,
+                    lastX, lastY,
+                    e.clientX, e.clientY
+                );
+
+                if (distanceToLine < 30) {
+					 splitDoritos(chip, angle);
+                     createParticles(chipCenterX, chipCenterY, currentHeight);
+                    gameContainer.removeChild(chip);
+                    score += 10; // Increase score
+                    scoreElement.textContent = score; // Update score display
+                }
+            }
+
+            lastX = e.clientX;
+            lastY = e.clientY;
+        }
+
+        function endSlice() {
+            isSlicing = false;
+        }
+          function pointToLineDistance(x, y, x1, y1, x2, y2) {
+            const A = x - x1;
+            const B = y - y1;
+            const C = x2 - x1;
+            const D = y2 - y1;
+
+            const dot = A * C + B * D;
+            const lenSq = C * C + D * D;
+            let param = -1;
+            if (lenSq !== 0) { // in case of 0 length line
+                param = dot / lenSq;
+            }
+
+            let xx, yy;
+
+            if (param < 0) {
+                xx = x1;
+                yy = y1;
+            } else if (param > 1) {
+                xx = x2;
+                yy = y2;
+            } else {
+                xx = x1 + param * C;
+                yy = y1 + param * D;
+            }
+
+            const dx = x - xx;
+            const dy = y - yy;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function splitDoritos(doritos, angle) {
+			 const rect = doritos.getBoundingClientRect();
+            const originalSrc = doritos.src;
+
+            const half1 = document.createElement('img');
+            half1.className = 'doritos-half';
+            half1.src = originalSrc;
+            half1.style.clipPath = `polygon(0 0, 100% 0, 100% 50%, 0 50%)`;
+            half1.style.left = `${rect.left}px`;
+            half1.style.top = `${rect.top}px`;
+             // Set animation variables
+            half1.style.setProperty('--flyX', `${-100 - Math.random() * 100}px`);
+            half1.style.setProperty('--flyY', `${100 + Math.random() * 100}px`);
+            half1.style.setProperty('--spinDeg', `${-360 - Math.random() * 360}deg`);
+            gameContainer.appendChild(half1);
+
+            const half2 = document.createElement('img');
+            half2.className = 'doritos-half';
+            half2.src = originalSrc;
+            half2.style.clipPath = `polygon(0 50%, 100% 50%, 100% 100%, 0 100%)`;
+            half2.style.left = `${rect.left}px`;
+            half2.style.top = `${rect.top}px`;
+              // Set animation variables
+            half2.style.setProperty('--flyX', `${100 + Math.random() * 100}px`);
+            half2.style.setProperty('--flyY', `${100 + Math.random() * 100}px`);
+            half2.style.setProperty('--spinDeg', `${360 + Math.random() * 360}deg`);
+            gameContainer.appendChild(half2);
+
+        }
+ // Improved particle creation (dynamic count and size)
+        function createParticles(x, y, sliceHeight) {
+			const numParticles = Math.floor(sliceHeight * 2); // Dynamic particle count
+
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+
+                // Randomize size
+                const size = 2 + Math.random() * 4; // Sizes between 2 and 6
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+
+                // Randomize initial trajectory (slightly less extreme)
+                const midX = (Math.random() - 0.5) * 60;
+                const midY = (Math.random() - 0.5) * 60;
+                const midRotation = Math.random() * 360;
+
+                // Final position and rotation
+                const finalX = midX * 2;
+                const finalY = midY + 50 + (Math.random() * 50);  //fall down
+                const rotation = midRotation + (Math.random() * 180 -90);
+
+                // Scale for more variation
+                const scale = Math.random() * 0.5 + 0.5;
+
+                particle.style.setProperty('--midX', `${midX}px`);
+                particle.style.setProperty('--midY', `${midY}px`);
+                particle.style.setProperty('--midRotation', `${midRotation}deg`);
+                particle.style.setProperty('--finalX', `${finalX}px`);
+                particle.style.setProperty('--finalY', `${finalY}px`);
+                particle.style.setProperty('--rotation', `${rotation}deg`);
+				particle.style.setProperty('--scale', scale);
+
+
+                particle.style.animation = `particleFall ${0.5 + Math.random() * 0.5}s ease-out forwards`;
+
+                gameContainer.appendChild(particle);
+
+                setTimeout(() => {
+                    gameContainer.removeChild(particle);
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
