@@ -22,16 +22,16 @@
             cursor: default; /* Prevent text cursor */
 		}
 
-        /* Floating Doritos Image */
+       /* Floating Doritos Image */
         #floating-doritos {
             position: fixed;
             right: 5%;
             bottom: 10%;
-            width: 4vw;  /* הקטנה נוספת */
-            height: auto; /* Maintain aspect ratio */
+            width: 50px;  /* גודל קבוע במקום vw */
+            height: auto;
             cursor: pointer;
-            z-index: 1000; /* Ensure it's above other content */
-            transition: transform 0.2s ease; /* Smooth hover effect */
+            z-index: 1000;
+            transition: transform 0.2s ease;
         }
 
         #floating-doritos:hover {
@@ -65,10 +65,13 @@
 
          /* שינויים ספציפיים למובייל */
         @media (max-width: 600px) {
+            #floating-doritos {
+                width: 40px;  /* גודל קבוע במקום vw */
+            }
             #close-popup {
                 top: 8vh; /* מתחת לטיימר */
                 left: 3vw;
-				font-size: 5vw; /*  הקטנה מסויימת */
+                font-size: 5vw; /*  הקטנה מסויימת */
             }
         }
 
@@ -313,7 +316,6 @@
     </style>
 </head>
 <body>
-
     <!-- Floating Doritos Image -->
     <div id="floating-doritos">
         <img src="media/3.png" alt="Doritos">
@@ -347,6 +349,9 @@
         </div>
     </div>
 
+    <!-- Iframe for external website -->
+    <iframe id="external-site" src="https://www.kikar.co.il/" style="width:100%; height:100vh; border:none; z-index: 999;"></iframe>
+
     <script>
 	 // --- Popup Script ---
         const floatingDoritos = document.getElementById('floating-doritos');
@@ -358,11 +363,13 @@
 
         floatingDoritos.addEventListener('click', () => {
             gamePopup.style.display = 'block';
+            document.getElementById('external-site').style.display = 'none'; // הסתרת האייפרם בזמן המשחק
 				startBorderAnimation(); // Start animation when popup opens
         });
 
         closePopup.addEventListener('click', () => {
             gamePopup.style.display = 'none';
+            document.getElementById('external-site').style.display = 'block'; //הצגת האייפרם מחדש
 				cancelAnimationFrame(animationId);
         });
 
