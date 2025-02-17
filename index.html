@@ -3,36 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doritos Ninja - נראה אותך!</title>
-    <!-- Corrected Font Import -->
+    <title>Your Website</title>
     <link rel="preconnect" href="https://cdn.fonts.net">
     <link href="https://cdn.fonts.net/kit/b0067cb2-af6e-445f-93f1-5c08b330edca/b0067cb2-af6e-445f-93f1-5c08b330edca.css" rel="stylesheet" />
     <style>
-      /* General Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none; /* Prevent text selection */
+        /* General Styles */
+        body {
+            font-family: 'NachsholBlack', sans-serif; /* Your font */
+            margin: 0; /* Remove default body margin */
+            overflow-x: hidden; /* Prevent horizontal scrollbar */
+        }
+		*, *::before, *::after {
+			box-sizing: border-box;
+			user-select: none; /* Prevent text selection */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             cursor: default; /* Prevent text cursor */
+		}
+
+        /* Floating Doritos Image */
+        #floating-doritos {
+            position: fixed;
+            right: 5%;
+            bottom: 10%;
+            width: 4vw;  /* הקטנה נוספת */
+            height: auto; /* Maintain aspect ratio */
+            cursor: pointer;
+            z-index: 1000; /* Ensure it's above other content */
+            transition: transform 0.2s ease; /* Smooth hover effect */
         }
 
-        body {
-            background-color: #000;
-            overflow: hidden; /* Prevent scrolling */
-            font-family: 'NachsholBlack', sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            color: white;
+        #floating-doritos:hover {
+            transform: scale(1.1) rotate(5deg); /* Example hover effect */
         }
+
+        /* Popup Styles */
+        #game-popup {
+            display: none; /* Initially hidden */
+            position: fixed;
+            top: 2.5%; /* Slightly smaller than full screen */
+            left: 2.5%;
+            width: 95%;
+            height: 95%;
+            background-color: #000; /* Solid Black */
+            z-index: 1001; /* Above the floating Doritos */
+            overflow: hidden;
+        }
+
+        /* Close Button */
+        #close-popup {
+            position: absolute;
+            top: 1rem;
+            left: 1.5rem;
+            font-size: 2.5rem;
+            color: #FF4B00;
+            cursor: pointer;
+            font-family: 'NachsholBlack', sans-serif;
+            z-index: 1003;
+        }
+
+         /* שינויים ספציפיים למובייל */
+        @media (max-width: 600px) {
+            #close-popup {
+                top: 8vh; /* מתחת לטיימר */
+                left: 3vw;
+				font-size: 5vw; /*  הקטנה מסויימת */
+            }
+        }
+
+		/* Game Styles (Merged from Game Code) */
 
         #game-container {
-            flex: 1;
-            position: relative;
+            position: relative; /* Important for positioning game elements */
+            width: 100%; /* Fill the popup */
+            height: 100%;
+			z-index: 1002;
+            overflow: hidden; /* Prevents content from expanding the container */
+            padding: 2rem; /* Padding for the border animation */
         }
           /* Canvas Styles */
           #slice-canvas {
@@ -213,7 +261,11 @@
 
         /* Desktop Styles */
         @media (min-width: 601px) {
-            #score, #timer {
+            #floating-doritos {
+                width: 60px; /* Fixed size for desktop */
+            }
+
+			 #score, #timer {
                 font-size: 2em;
             }
 
@@ -248,34 +300,144 @@
                 height: 80px;
             }
         }
+
+		/* Animated Border Canvas */
+		#border-canvas {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			pointer-events: none; /* Allow clicks through the canvas */
+		}
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <!-- Score and Timer -->
-        <div id="score">ניקוד: <span id="score-value">0</span></div>
-        <div id="timer">זמן: <span id="timer-value">30</span></div>
 
-        <!-- Game Over Screen -->
-        <div id="game-over">
-             <h2>נגמר הזמן, חביבי!</h2>
-            <div id="final-score"></div>
-            <div id="challenge-text"></div>
-            <button id="restart-button">יאללה, עוד סיבוב!</button>
-        </div>
-          <!-- Canvas for slice effect -->
-        <canvas id="slice-canvas"></canvas>
+    <!-- Floating Doritos Image -->
+    <div id="floating-doritos">
+        <img src="media/3.png" alt="Doritos">
     </div>
 
-    <!-- Start Screen -->
-    <div id="start-screen">
-        <div class="title">דוריטוס נינג'ה</div>
-        <div class="tagline">תראה מה זה! אתה מספיק גבר לחתוך את כל הדוריטוס האלה?!</div>
-        <button id="start-button">בוא נתחיל</button>
+    <!-- Game Popup -->
+    <div id="game-popup">
+			<canvas id="border-canvas"></canvas>
+        <span id="close-popup">X</span>
+        <!-- Game Container -->
+        <div id="game-container">
+			  <!-- Start Screen -->
+				<div id="start-screen">
+					 <div class="title">דוריטוס נינג'ה</div>
+					 <div class="tagline">תראה מה זה! אתה מספיק גבר לחתוך את כל הדוריטוס האלה?!</div>
+					 <button id="start-button">בוא נתחיל</button>
+				</div>
+				  <!-- Score and Timer -->
+        		<div id="score">ניקוד: <span id="score-value">0</span></div>
+        		<div id="timer">זמן: <span id="timer-value">30</span></div>
+
+        		<!-- Game Over Screen -->
+        		<div id="game-over">
+           		  <h2>נגמר הזמן, חביבי!</h2>
+          		  <div id="final-score"></div>
+          		  <div id="challenge-text"></div>
+           		 <button id="restart-button">יאללה שוב!</button>
+       			</div>
+        			<!-- Canvas for slice effect -->
+     			<canvas id="slice-canvas"></canvas>
+        </div>
     </div>
 
     <script>
-    (function() { // Wrap in an IIFE to avoid global scope pollution
+	 // --- Popup Script ---
+        const floatingDoritos = document.getElementById('floating-doritos');
+        const gamePopup = document.getElementById('game-popup');
+        const closePopup = document.getElementById('close-popup');
+		  const borderCanvas = document.getElementById('border-canvas');
+		  const ctxBorder = borderCanvas.getContext('2d');
+		  let animationId;
+
+        floatingDoritos.addEventListener('click', () => {
+            gamePopup.style.display = 'block';
+				startBorderAnimation(); // Start animation when popup opens
+        });
+
+        closePopup.addEventListener('click', () => {
+            gamePopup.style.display = 'none';
+				cancelAnimationFrame(animationId);
+        });
+
+		  function resizeCanvas() {
+            borderCanvas.width = gamePopup.offsetWidth;
+            borderCanvas.height = gamePopup.offsetHeight;
+        }
+		  window.addEventListener('resize', resizeCanvas);
+
+		 function startBorderAnimation() {
+			 resizeCanvas();
+			  let start = null;
+            const duration = 8000; //  8 seconds
+
+            function animate(timestamp) {
+                if (!start) start = timestamp;
+                const progress = timestamp - start;
+
+                ctxBorder.clearRect(0, 0, borderCanvas.width, borderCanvas.height);
+
+                // Draw multiple electric arcs
+					 drawElectricArc(progress, duration, 0, 0, borderCanvas.width, 0, 3, 15); // Top
+                drawElectricArc(progress, duration, borderCanvas.width, 0, borderCanvas.width, borderCanvas.height, 3, 15);  // Right
+                drawElectricArc(progress, duration, borderCanvas.width, borderCanvas.height, 0, borderCanvas.height, 3, 15); // Bottom
+					 drawElectricArc(progress, duration, 0, borderCanvas.height, 0, 0, 3, 15); // Left
+
+                if (progress < duration) {
+                    animationId = requestAnimationFrame(animate);
+                } else {
+						  startBorderAnimation(); // Restart the animation
+					 }
+            }
+
+            animationId = requestAnimationFrame(animate); // start
+        }
+
+		function drawElectricArc(progress, duration, startX, startY, endX, endY, segments, offset) {
+			let percentComplete = progress / duration;
+
+			ctxBorder.beginPath();
+			ctxBorder.moveTo(startX, startY);
+
+			// Calculate the next position along the line for each segment
+			let dx = (endX - startX) / segments;
+			let dy = (endY - startY) / segments;
+
+			for (let i = 0; i < segments; i++) {
+				 let nextPointX = startX + dx * i;
+				 let nextPointY = startY + dy * i;
+
+				 let offsetX = (Math.random() - 0.5) * 2 * offset;
+				 let offsetY = (Math.random() - 0.5) * 2 * offset;
+				 ctxBorder.lineTo(nextPointX + offsetX, nextPointY + offsetY);
+			}
+			ctxBorder.lineTo(endX, endY);
+
+			// Set gradient and shadow for the arc
+			const gradient = ctxBorder.createLinearGradient(startX, startY, endX, endY);
+			gradient.addColorStop(0, "#FF6B00");
+			gradient.addColorStop(0.45, "#FFB800");
+			gradient.addColorStop(0.55, "#FFD700");
+			gradient.addColorStop(0.65, "#FFB800");
+			gradient.addColorStop(1, "#FF4B00");
+			ctxBorder.strokeStyle = gradient;
+			ctxBorder.lineWidth = 3;
+			ctxBorder.shadowBlur = 20;
+			ctxBorder.shadowColor = "#ff4b00";
+			ctxBorder.lineCap = "round";
+			ctxBorder.lineJoin = "round";
+
+			ctxBorder.stroke();
+		}
+
+		// --- Game Script (Merged from Game Code) ---
+		 (function() { // Wrap in an IIFE to avoid global scope pollution
         let score = 0;
         let gameActive = false;
         let timeLeft = 30;
@@ -293,8 +455,10 @@
 
         // --- Event Listeners ---
         startButton.addEventListener('click', startGame);
+        startButton.addEventListener('touchstart', startGame);
         document.getElementById('restart-button').addEventListener('click', startGame);
-        window.addEventListener('resize', resizeCanvas);
+        document.getElementById('restart-button').addEventListener('touchstart', startGame);
+        window.addEventListener('resize', resizeCanvasGame);
 
         // Mouse Events
         gameContainer.addEventListener('mousedown', startSlice);
@@ -311,13 +475,14 @@
 
         function startGame() {
             startScreen.style.display = 'none';
+				startScreen.style.pointerEvents = 'none'; // Let clicks pass through
             document.getElementById('game-over').style.display = 'none';
             gameActive = true;
             score = 0;
             timeLeft = 30;
             scoreElement.textContent = score;
             document.getElementById('timer-value').textContent = timeLeft;
-            resizeCanvas(); // Initial canvas sizing
+            resizeCanvasGame(); // Initial canvas sizing
 
             clearInterval(gameTimer);
             gameTimer = setInterval(updateTimer, 1000);
@@ -342,15 +507,15 @@
             const challengeText = document.getElementById('challenge-text');
 
             gameOver.style.display = 'block';
-            finalScore.textContent = `השגת ${score} נקודות, לא רע!`;
+            finalScore.textContent = `השגת ${score} נקודות`;
 
             let message = '';
             if (score < 100) {
                 message = 'מה נסגר? זה כל מה שיש לך לתת? קדימה, תתאמץ קצת, קרחנה!';
             } else if (score < 200) {
-                message = 'בסדר, לא רע בכלל. אבל יש לך עוד הרבה מה להוכיח, צ׳יקו!';
+                message = 'לא רע בכלל. אבל יש לך עוד הרבה מה להוכיח, צ׳יקו!';
             } else if (score < 300) {
-                message = 'וואו! אתה תותח! אבל... נראה אותך שובר את השיא של עצמך, אמיגו!';
+                message = 'וואו! אתה תותח! אבל... נראה אותך שובר את השיא, אמיגו!';
             } else {
                 message = 'מטורף! אתה פשוט אגדה! אבל... בטוח שאי אפשר *יותר* מזה?';
             }
@@ -411,7 +576,7 @@
             setTimeout(spawnDoritos, 200 + Math.random() * 300);
         }
 
-        function resizeCanvas() {
+        function resizeCanvasGame() {
             sliceCanvas.width = gameContainer.offsetWidth;
             sliceCanvas.height = gameContainer.offsetHeight;
         }
