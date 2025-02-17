@@ -67,12 +67,23 @@
             z-index: 1003;
         }
 
-         /* שינויים ספציפיים למובייל */
+        /* ערכים התחלתיים (לדסקטופ) */
+        :root {
+            --doritos-angle-min: -70;
+            --doritos-angle-max: 70;
+        }
+
+        /* ערכים למובייל */
         @media (max-width: 600px) {
+            :root {
+                --doritos-angle-min: -30; /* זווית יותר לכיוון למעלה */
+                --doritos-angle-max: 30;  /* זווית יותר לכיוון למעלה */
+            }
+
             #close-popup {
-                top: 8vh; /* מתחת לטיימר */
+                top: 8vh;
                 left: 3vw;
-                font-size: 5vw; /*  הקטנה מסויימת */
+                font-size: 5vw;
             }
         }
 
@@ -556,6 +567,15 @@
         function spawnDoritos() {
             if (!gameActive) return;
 
+            // מגבלה על מספר הדוריטוס (ראה הסבר בהמשך)
+            const maxDoritos = 20; //לדוגמא, 20 דוריטוס מקסימום
+            const existingDoritos = document.getElementsByClassName('doritos').length;
+            if(existingDoritos>=maxDoritos){
+                setTimeout(spawnDoritos, 200 + Math.random() * 300); // נסה שוב עוד מעט
+                return;
+            }
+
+
             const doritos = document.createElement('img');
             doritos.className = 'doritos';
             doritos.src = `media/${Math.floor(Math.random() * 4) + 1}.png`;
@@ -566,20 +586,38 @@
             const startX = Math.max(0, Math.min(containerRect.width - doritosWidth, Math.random() * (containerRect.width - doritosWidth)));
             const startY = containerRect.height; // Start from the bottom
 
-             doritos.style.left = `${containerRect.left + startX}px`; // Relative position
-             doritos.style.top = `${containerRect.top + startY}px`;
+            doritos.style.left = `${containerRect.left + startX}px`; // Relative position
+            doritos.style.top = `${containerRect.top + startY}px`;
 
             gameContainer.appendChild(doritos);
 
-            const angle = -70 + Math.random() * 140;
-            const speed = 8 + Math.random() * 5;
+            // קריאת משתני הזווית מה-CSS
+            let angleMin, angleMax;
+
+            // בדיקת רוחב המסך ב-JS (אופציונלי, אבל מומלץ)
+            if (window.innerWidth <= 600) {
+                // מובייל
+                angleMin = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--doritos-angle-min'));
+                angleMax = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--doritos-angle-max'));
+            } else {
+                // דסקטופ
+                angleMin = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--doritos-angle-min'));
+                angleMax = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--doritos-angle-max'));
+            }
+            if (isNaN(angleMin)) angleMin = -70; // ערך ברירת מחדל
+            if (isNaN(angleMax)) angleMax = 70;
+
+
+            const angle = angleMin + Math.random() * (angleMax - angleMin);
+            // שינוי מהירות: בין 10 ל-18
+            const speed = 10 + Math.random() * 8;
             let currentY = startY;
             let currentX = startX;
             let rotation = 0;
 
             function animateDoritos() {
                 if (!gameActive) {
-                     doritos.remove();
+                    doritos.remove();
                     return;
                 }
 
@@ -598,7 +636,8 @@
             }
 
             animateDoritos();
-            setTimeout(spawnDoritos, 200 + Math.random() * 300);
+            // יותר דוריטוס - השהייה בין 0.1 ל-0.2 שניות
+            setTimeout(spawnDoritos, 100 + Math.random() * 100);
         }
 
         function resizeCanvasGame() {
