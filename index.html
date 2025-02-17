@@ -27,11 +27,15 @@
             position: fixed;
             right: 5%;
             bottom: 10%;
-            width: 50px;  /* גודל קבוע במקום vw */
             height: auto;
             cursor: pointer;
             z-index: 1000;
             transition: transform 0.2s ease;
+        }
+
+        #floating-doritos img {
+            width: 100px; /* Mobile size */
+            height: auto;
         }
 
         #floating-doritos:hover {
@@ -65,9 +69,6 @@
 
          /* שינויים ספציפיים למובייל */
         @media (max-width: 600px) {
-            #floating-doritos {
-                width: 40px;  /* גודל קבוע במקום vw */
-            }
             #close-popup {
                 top: 8vh; /* מתחת לטיימר */
                 left: 3vw;
@@ -264,8 +265,14 @@
 
         /* Desktop Styles */
         @media (min-width: 601px) {
+
             #floating-doritos {
-                width: 60px; /* Fixed size for desktop */
+                right: 20%; /* ערך עבור דסקטופ */
+                bottom: 10%;
+            }
+            
+            #floating-doritos img {
+                width: 150px; /* Fixed size for desktop */
             }
 
 			 #score, #timer {
@@ -313,6 +320,17 @@
 			height: 100%;
 			pointer-events: none; /* Allow clicks through the canvas */
 		}
+
+          /* Iframe for external website */
+        #external-site {
+          width: 100%;
+          height: 100vh;
+          border: none;
+          z-index: 999; /*  מתחת לפופאפ */
+          position: fixed; /*  חשוב! */
+          top: 0; /*  חשוב! */
+          left: 0; /*  חשוב! */
+        }
     </style>
 </head>
 <body>
@@ -363,14 +381,14 @@
 
         floatingDoritos.addEventListener('click', () => {
             gamePopup.style.display = 'block';
-            document.getElementById('external-site').style.display = 'none'; // הסתרת האייפרם בזמן המשחק
-				startBorderAnimation(); // Start animation when popup opens
+            document.getElementById('external-site').style.zIndex = '999'; //הפיתרון
+            startBorderAnimation();
         });
 
         closePopup.addEventListener('click', () => {
             gamePopup.style.display = 'none';
-            document.getElementById('external-site').style.display = 'block'; //הצגת האייפרם מחדש
-				cancelAnimationFrame(animationId);
+            document.getElementById('external-site').style.zIndex = '999'; //הפיתרון
+            cancelAnimationFrame(animationId);
         });
 
 		  function resizeCanvas() {
